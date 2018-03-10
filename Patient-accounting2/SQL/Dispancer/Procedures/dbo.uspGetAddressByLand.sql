@@ -45,3 +45,6 @@ AS
   END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetAddressByLand] TO [Sensitive_low] AS [dbo]
+GO

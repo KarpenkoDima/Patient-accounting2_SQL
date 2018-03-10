@@ -39,3 +39,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetAddressByLastName] TO [Sensitive_low] AS [dbo]
+GO

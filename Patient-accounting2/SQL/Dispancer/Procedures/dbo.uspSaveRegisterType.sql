@@ -103,3 +103,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspSaveRegisterType] TO [Sensitive_medium] AS [dbo]
+GO

@@ -48,3 +48,6 @@ SELECT vgi.ChiperReceptID,
   END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetInvalidByBenefitsCategory] TO [Sensitive_low] AS [dbo]
+GO

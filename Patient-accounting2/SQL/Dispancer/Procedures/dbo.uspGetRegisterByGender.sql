@@ -41,3 +41,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByGender] TO [Sensitive_low] AS [dbo]
+GO

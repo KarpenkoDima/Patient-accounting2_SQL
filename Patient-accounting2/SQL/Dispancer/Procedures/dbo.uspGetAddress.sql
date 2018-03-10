@@ -17,14 +17,27 @@ AS
 BEGIN
     	SET NOCOUNT ON;
     
-		SET @City = ISNULL(@City, '%%');
+		SET @City = ISNULL(nullif(@City, ''), '%%');
+	
     	IF @city IS NOT NULL AND @nameStreet IS NOT NULL
     	BEGIN    		
+    --IF @city IS NOT NULL AND @nameStreet IS NOT NULL
+    --	BEGIN
+    --	SET @City = ISNULL(@City, '%%');
+    --	SET @NameStreet = ISNULL(@NameStreet, '%%');
     
+    --	IF @City = N'' 
+    --	BEGIN
+    --		SET @City ='%%';
+    --	END 
+    --	IF @NameStreet = N'' 
+    --	BEGIN
+    --		SET @NameStreet ='%%';
+    --	END ;
 		  WITH CTE_GetCustomeIDByAddress(CustomerID)
     	AS(
     		SELECT customerID FROM [dbo].vGetAddress AS a
-    		WHERE a.city like @City and a.NameStreet LIKE '%'+@NameStreet+'%'
+    		WHERE a.city like @City and a.NameStreet LIKE @NameStreet+'%'
     	)
 		  SELECT vga.AddressID,
                  vga.AdminDivisionID,
@@ -40,7 +53,7 @@ BEGIN
 				  INNER	JOIN CTE_GetCustomeIDByAddress AS cte_
 				  ON  cte_.CustomerID = vga.CustomerID;	
     	END
-    	END		
+    	END
 
 GO
 

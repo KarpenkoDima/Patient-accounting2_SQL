@@ -160,3 +160,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspSaveInvalid] TO [Sensitive_medium] AS [dbo]
+GO

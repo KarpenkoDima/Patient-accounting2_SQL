@@ -54,3 +54,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByApppTpr] TO [Sensitive_low] AS [dbo]
+GO

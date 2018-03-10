@@ -53,3 +53,6 @@ SELECT vgr.CustomerID,
   END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByBenefitsCategory] TO [Sensitive_low] AS [dbo]
+GO

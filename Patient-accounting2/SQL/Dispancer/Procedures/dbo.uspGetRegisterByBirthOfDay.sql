@@ -207,3 +207,6 @@ WITH CTE_( CustomerID)
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByBirthOfDay] TO [Sensitive_low] AS [dbo]
+GO

@@ -80,3 +80,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByCustomerID] TO [Sensitive_low] AS [dbo]
+GO

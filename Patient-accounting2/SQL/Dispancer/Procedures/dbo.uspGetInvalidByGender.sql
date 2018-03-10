@@ -37,3 +37,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetInvalidByGender] TO [Sensitive_low] AS [dbo]
+GO

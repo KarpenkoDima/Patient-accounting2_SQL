@@ -6,7 +6,7 @@ GO
 
 /* [DispensaryMainTest].[dbo].[uspGetInvalidByAddress] */
 
-CREATE PROCEDURE [dbo].[uspGetInvalidByAddress]
+CREATE PROCEDURE [dbo].[uspGetInvalidBenefitsByAddress]
 (
 	@City NVARCHAR(100) NULL,
 	@NameStreet NVARCHAR(100)	
@@ -32,21 +32,20 @@ BEGIN
     	--BEGIN
     	--	SET @NameStreet ='%%';
     	--END ;
-		   WITH CTE_GetCustomeIDByAddress(CustomerID)
+		  WITH CTE_GetCustomeIDByAddress(CustomerID)
     	AS(
-    		SELECT customerID FROM [dbo].[Address] AS a
-    		WHERE a.City LIKE @City AND a.NameStreet LIKE @NameStreet+'%'
+    		SELECT customerID FROM [dbo].vGetAddress  AS a
+    		WHERE a.City LIKE '%%' AND a.NameStreet LIKE @NameStreet +'%'
     	)
-		  SELECT vgi.ChiperReceptID,
-                 vgi.CustomerID,
-                 vgi.DataInvalidity,
-                 vgi.DateIncapable,
-                 vgi.DisabilityGroupID,
-                 vgi.Incapable,
-                 vgi.InvalidID,
-                 vgi.ModifiedDate,
-                 vgi.PeriodInvalidity FROM dbo.vGetInvalid AS vgi
-				  INNER	JOIN CTE_GetCustomeIDByAddress AS cte_
+    	
+    	SELECT
+    		ibc.invID,
+    		ibc.BenefitsID
+    	FROM
+    		 vGetInvalid_BenefitsCategory AS ibc
+    		INNER JOIN vGetInvalid AS vgi
+    		ON ibc.invID = vgi.InvalidID
+    		INNER	JOIN CTE_GetCustomeIDByAddress AS cte_
 				  ON  cte_.CustomerID = vgi.CustomerID;
 	END 
 		
@@ -54,5 +53,5 @@ END
 
 GO
 
-GRANT EXECUTE ON [dbo].[uspGetInvalidByAddress] TO [Sensitive_low] AS [dbo]
+GRANT EXECUTE ON [dbo].[uspGetInvalidBenefitsByAddress] TO [Sensitive_low] AS [dbo]
 GO

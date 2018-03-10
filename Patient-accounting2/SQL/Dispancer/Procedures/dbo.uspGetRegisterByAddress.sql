@@ -12,24 +12,28 @@ CREATE PROCEDURE [dbo].[uspGetRegisterByAddress]
 AS
 BEGIN
     	SET NOCOUNT ON;
-    
+    	
+    	SET @City = ISNULL(nullif(@City,''), '%%');
     	IF @city IS NOT NULL AND @nameStreet IS NOT NULL
-    	BEGIN
-    	SET @City = ISNULL(@City, '%%');
-    	SET @NameStreet = ISNULL(@NameStreet, '%%');
+    	BEGIN   
     
-    	IF @City = N'' 
-    	BEGIN
-    		SET @City ='%%';
-    	END 
-    	IF @NameStreet = N'' 
-    	BEGIN
-    		SET @NameStreet ='%%';
-    	END ;
+    	--IF @city IS NOT NULL AND @nameStreet IS NOT NULL
+    	--BEGIN
+    	--SET @City = ISNULL(@City, '%%');
+    	--SET @NameStreet = ISNULL(@NameStreet, '%%');
+    
+    	--IF @City = N'' 
+    	--BEGIN
+    	--	SET @City ='%%';
+    	--END 
+    	--IF @NameStreet = N'' 
+    	--BEGIN
+    	--	SET @NameStreet ='%%';
+    	--END ;
 		   WITH CTE_GetCustomeIDByAddress(CustomerID)
     	AS(
     		SELECT customerID FROM [dbo].[vGetAddress] AS a
-    		WHERE a.City LIKE N'%%' AND a.NameStreet = @NameStreet
+    		WHERE a.City LIKE @City AND a.NameStreet LIKE @NameStreet+'%'
     	)
 		  SELECT vgr.CustomerID,
                  vgr.Diagnosis,
@@ -51,4 +55,7 @@ BEGIN
 		
 END
 
+GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByAddress] TO [Sensitive_low] AS [dbo]
 GO

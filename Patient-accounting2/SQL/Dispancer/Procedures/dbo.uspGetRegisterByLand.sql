@@ -37,3 +37,6 @@ AS
   END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetRegisterByLand] TO [Sensitive_low] AS [dbo]
+GO

@@ -29,3 +29,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetAddressByCustomerID] TO [Sensitive_low] AS [dbo]
+GO

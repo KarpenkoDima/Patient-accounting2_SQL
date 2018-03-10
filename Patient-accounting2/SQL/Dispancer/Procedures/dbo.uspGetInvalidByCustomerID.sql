@@ -27,3 +27,6 @@ FROM
 WHERE i.CustomerID = @CustomerID
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetInvalidByCustomerID] TO [Sensitive_low] AS [dbo]
+GO

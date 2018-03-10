@@ -39,3 +39,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetAddressByGender] TO [Sensitive_low] AS [dbo]
+GO

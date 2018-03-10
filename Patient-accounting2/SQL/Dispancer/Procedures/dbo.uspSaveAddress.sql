@@ -150,3 +150,6 @@ BEGIN
 END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspSaveAddress] TO [Sensitive_medium] AS [dbo]
+GO

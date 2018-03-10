@@ -43,3 +43,6 @@ AS
   END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetInvalidByLand] TO [Sensitive_low] AS [dbo]
+GO

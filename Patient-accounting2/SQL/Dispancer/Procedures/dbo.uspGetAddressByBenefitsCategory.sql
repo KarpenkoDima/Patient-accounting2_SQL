@@ -56,3 +56,6 @@ SELECT  vga.AddressID,
   END
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetAddressByBenefitsCategory] TO [Sensitive_low] AS [dbo]
+GO

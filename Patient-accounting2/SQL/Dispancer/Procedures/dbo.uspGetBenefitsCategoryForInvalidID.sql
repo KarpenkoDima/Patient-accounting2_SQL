@@ -31,3 +31,6 @@ AS
 	SELECT @BenefitsCayegory;
 
 GO
+
+GRANT EXECUTE ON [dbo].[uspGetBenefitsCategoryForInvalidID] TO [Sensitive_low] AS [dbo]
+GO
