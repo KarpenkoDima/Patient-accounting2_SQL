@@ -13,7 +13,7 @@ CREATE PROCEDURE [dbo].[uspDeleteBenefitsCategory]
 *                        deleting records from table 
 *                        Land
 * Date:   13.12.2015 
-* Author:  Author: DIMA KARPENKO
+* Author: DIMA KARPENKO
 *
 * Changes
 * Date        Modified By            Comments
