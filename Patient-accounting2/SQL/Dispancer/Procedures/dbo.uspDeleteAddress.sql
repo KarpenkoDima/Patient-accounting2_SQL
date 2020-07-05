@@ -13,7 +13,7 @@ CREATE PROCEDURE [dbo].[uspDeleteAddress]
 *                        deleting records from table 
 *                        Address
 * Date:   13.12.2015 
-* Author: DIMA
+* Author: DIMA KARPENKO
 *
 * Changes
 * Date        Modified By            Comments
