@@ -157,9 +157,16 @@ public sealed record FullName
         ? $"{LastName} {FirstName}"
         : $"{LastName} {FirstName} {MiddleName}";
 
+   /* Архитектурные несоответствия
+4. protected FullName(bool efCoreConstructor) { } — ненужный хак
+EF Core 8 умеет использовать private parameterless конструктор через рефлексию — это стандартная и задокументированная возможность. Фиктивный protected-конструктор с bool-параметром:
+
+не нужен
+вводит в заблуждение читателя ("почему bool?")
+создаёт ложное впечатление, что EF Core требует специального конструктора
     // Для EF Core: OwnsOne требует публичный конструктор без параметров
     // Добавляем protected конструктор для EF
-    protected FullName(bool efCoreConstructor) { }
+    protected FullName(bool efCoreConstructor) { }*/
 }
 ```
 
@@ -210,7 +217,7 @@ public sealed record AddressDetails
             NumberApartment is not null ? $"кв. {NumberApartment}" : null
         }.Where(s => s is not null));
 
-    protected AddressDetails(bool efCoreConstructor) { }
+    //protected AddressDetails(bool efCoreConstructor) { }
 }
 ```
 
@@ -610,7 +617,9 @@ public sealed class Register
     {
         if (FirstDeregister.HasValue)
             throw new DomainException("Пациент уже снят с учёта (первичный).");
-        if (deregisterDate < FirstRegister)
+        /*Сравнение DateTime с DateTime? через nullable lifting: если FirstRegister == null, выражение возвращает false и проверка молча пропускается. Бизнес-инвариант не выполнится. Нужно:
+        if (deregisterDate < FirstRegister) // ⚠️*/
+        if(FirstRegister.HasValue && deregisterDate < FirstRegister.Value)
             throw new DomainException("Дата снятия с учёта не может быть раньше даты постановки.");
 
         FirstDeregister = deregisterDate;
@@ -875,7 +884,14 @@ internal sealed class AddressConfiguration : IEntityTypeConfiguration<Address>
             .HasDefaultValueSql("GETDATE()");
 
         builder.HasOne(a => a.Customer)
-            .WithMany()
+            /*При этом CustomerConfiguration объявляет:
+csharpbuilder.Navigation(c => c.Addresses).HasField("_addresses");
+builder.Navigation(c => c.Registers).HasField("_registers");
+Конфликт: WithMany() без аргумента говорит EF Core «обратной навигации не существует», но Navigation() пытается её настроить. EF может либо создать две отдельные связи, либо одна из них «выиграет» и коллекция не будет заполняться при .Include(). Правильно:
+            // .WithMany() без навигационного свойства — несоответствие маппинга
+            .WithMany() // ❌ — говорит EF: обратной навигации нет
+            */
+            .WithMany(c => c.Addresses)
             .HasForeignKey(a => a.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -916,7 +932,14 @@ internal sealed class RegisterConfiguration : IEntityTypeConfiguration<Register>
 
         // ─── Связи (два FK на RegisterType — нельзя оба делать CASCADE в SQL Server)
         builder.HasOne(r => r.Customer)
-            .WithMany()
+            /*При этом CustomerConfiguration объявляет:
+csharpbuilder.Navigation(c => c.Addresses).HasField("_addresses");
+builder.Navigation(c => c.Registers).HasField("_registers");
+Конфликт: WithMany() без аргумента говорит EF Core «обратной навигации не существует», но Navigation() пытается её настроить. EF может либо создать две отдельные связи, либо одна из них «выиграет» и коллекция не будет заполняться при .Include(). Правильно:
+            // .WithMany() без навигационного свойства — несоответствие маппинга
+            .WithMany() // ❌ — говорит EF: обратной навигации нет
+            */
+            .WithMany(c => c.Registers)
             .HasForeignKey(r => r.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -973,7 +996,7 @@ internal sealed class InvalidConfiguration : IEntityTypeConfiguration<Invalid>
         });
 
         builder.HasOne(i => i.Customer)
-            .WithMany()
+            .WithMany(c => c.Invalids)
             .HasForeignKey(i => i.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -1283,9 +1306,14 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Interceptors регистрируются как Singleton — они stateless
-        services.AddSingleton<SoftDeleteInterceptor>();
-        services.AddSingleton<AuditInterceptor>();
-
+        services.AddSingleton<SoftDeleteInterceptor>();        
+        //Критические баги (сломают prodution)
+       /* AuditInterceptor принимает IMediator в конструкторе. MediatR по умолчанию регистрируется как Scoped. Singleton, захватывающий Scoped-зависимость — классический captive dependency. В итоге IMediator становится де-факто синглтоном и начинает тащить за собой все Scoped-сервисы (DbContext, репозитории) в неверном жизненном цикле. Падёт не сразу — а в самый неожиданный момент под нагрузкой.
+Правильно: AuditInterceptor должен быть Scoped.
+        services.AddSingleton<AuditInterceptor>(); // ❌
+        */
+        services.AddScoped<AuditInterceptor>();
+        
         services.AddDbContext<DispancerDbContext>((sp, options) =>
         {
             options.UseSqlServer(
@@ -1511,7 +1539,7 @@ public interface IRepository<T> where T : class
     Task<T?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default);
     void Add(T entity);
-    void Update(T entity);
+    //void Update(T entity);
     void Remove(T entity);
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }
@@ -1669,8 +1697,10 @@ internal sealed class CustomerRepository : ICustomerRepository
 
     public void Add(Customer entity) => _context.Customers.Add(entity);
 
-    public void Update(Customer entity) => _context.Customers.Update(entity);
-
+    /*5. IRepository<T>.Update(T entity) — антипаттерн в Rich Domain Model
+csharppublic void Update(Customer entity) => _context.Customers.Update(entity); // ⚠️
+DbSet.Update() помечает всю сущность как Modified и генерирует UPDATE по всем колонкам. Это прямое противоречие RDM: в rich model вы загружаете трекируемую сущность, вызываете доменный метод, и EF сам отслеживает изменения через Change Tracker. Метод Update в репозитории нужен только при disconnected-сценариях (API без контекста), что не соответствует описанной архитектуре.*/
+    //public void Update(Customer entity) => _context.Customers.Update(entity);
     public void Remove(Customer entity) =>
         // SoftDeleteInterceptor перехватит Deleted → Modified + IsDeleted = true
         _context.Customers.Remove(entity);
