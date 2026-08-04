@@ -1,4 +1,22 @@
 # Entity Framework Core 8: Руководство для Senior-архитектора
+
+> [!WARNING]
+> Это учебный материал, созданный на основе legacy-проекта
+> Patient-accounting2.
+>
+> Руководство сохранено для изучения EF Core и архитектурных решений,
+> но не является готовым production-рецептом.
+>
+> Некоторые примеры требуют дополнительной проверки:
+>
+> - baseline migrations для существующей базы;
+> - транзакции и обработка ошибок;
+> - вызов хранимых процедур;
+> - table-valued parameters;
+> - soft delete;
+> - domain events и transactional outbox;
+> - шифрование и хранение ключей.
+
 ### Система «Диспансер» — Production-Ready Reference Guide
 
 ---
